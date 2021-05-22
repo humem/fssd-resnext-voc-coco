@@ -1,2 +1,8 @@
 __pycache__/
 *~
+/*.png
+/data/det/
+/eval/
+/weights/
+/.ipynb_checkpoints/
+/Untitled.ipynb
