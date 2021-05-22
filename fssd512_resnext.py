@@ -327,7 +327,7 @@ class FSSD(nn.Module):
         # print('CF', conf.shape)        
 
         if self.phase == "test":
-            output = self.detect(
+            output = self.detect.forward(
                 loc.view(loc.size(0), -1, 4),                   # loc preds
                 self.softmax(conf.view(conf.size(0), -1,
                              self.num_classes)),                # conf preds

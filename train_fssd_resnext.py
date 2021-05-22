@@ -84,6 +84,8 @@ def train():
     elif args.dataset == 'VOC':
         cfg = vocd512
         dataset = VOCDetection(root=args.dataset_root,
+                               image_sets=[('2007', 'trainval')],
+                               dataset_name='VOC2007',
                                transform=SSDAugmentation(cfg['min_dim'],
                                                          MEANS))
 

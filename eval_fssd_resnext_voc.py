@@ -55,6 +55,8 @@ parser.add_argument('--cleanup', default=True, type=str2bool,
                     help='Cleanup and remove results files following eval')
 parser.add_argument('--use_pred_module', default=True, type=str2bool,
                     help='Use prediction module')
+parser.add_argument('--skip_detections', action='store_true',
+                    help='Skip detections')
 args = parser.parse_args()
 
 if not os.path.exists(args.save_folder):
@@ -154,7 +156,7 @@ def write_voc_results_file(all_boxes, dataset):
         with open(filename, 'wt') as f:
             for im_ind, index in enumerate(dataset.ids):
                 dets = all_boxes[cls_ind+1][im_ind]
-                if dets == []:
+                if len(dets) == 0:
                     continue
                 # the VOCdevkit expects 1-based indices
                 for k in range(dets.shape[0]):
@@ -289,7 +291,7 @@ cachedir: Directory for caching the annotations
     for imagename in imagenames:
         R = [obj for obj in recs[imagename] if obj['name'] == classname]
         bbox = np.array([x['bbox'] for x in R])
-        difficult = np.array([x['difficult'] for x in R]).astype(np.bool)
+        difficult = np.array([x['difficult'] for x in R]).astype(bool)
         det = [False] * len(R)
         npos = npos + sum(~difficult)
         class_recs[imagename] = {'bbox': bbox,
@@ -437,6 +439,13 @@ if __name__ == '__main__':
         net = net.cuda()
         cudnn.benchmark = True
     # evaluation
-    test_net(args.save_folder, net, args.cuda, dataset,
-             BaseTransform(net.size, dataset_mean), args.top_k, cfg['min_dim'],
-             thresh=args.confidence_threshold)
+    if args.skip_detections:
+        output_dir = get_output_dir('eval', set_type)
+        det_file = os.path.join(output_dir, 'detections.pkl')
+        with open(det_file, 'rb') as f:
+            all_boxes = pickle.load(f)
+        evaluate_detections(all_boxes, output_dir, dataset)
+    else:
+        test_net(args.save_folder, net, args.cuda, dataset,
+                 BaseTransform(net.size, dataset_mean), args.top_k, cfg['min_dim'],
+                 thresh=args.confidence_threshold)

@@ -243,8 +243,8 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
 
 
 def nms(boxes, scores, nms_thresh=0.5, top_k=200):
-    boxes = boxes.cpu().numpy()
-    scores = scores.cpu().numpy()
+    boxes = boxes.detach().cpu().numpy()
+    scores = scores.detach().cpu().numpy()
     keep = []
     if len(boxes) == 0:
         return keep
